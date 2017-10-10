@@ -1,0 +1,4 @@
+name: qingyunxiang-apiServer
+version: 0.0.1
+main: moe.haozi.qingyunxiang.apiServer.ApiServer
+prefix: qyx
