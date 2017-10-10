@@ -12,7 +12,7 @@ import java.util.function.*;
 
 public class Server {
     private HttpServer server;
-    private ArrayList<BiConsumer<Context, Supplier<String>>> CallbackList = new ArrayList<>();
+    private ArrayList<BiConsumer<Context, Consumer<String>>> CallbackList = new ArrayList<>();
     public Server() throws Exception{
         server = HttpServer.create();
         server.createContext("/", new HttpHandler() {
@@ -24,9 +24,8 @@ public class Server {
                     if(CallbackList.get(index) == null) {
                         return;
                     }
-                    CallbackList.get(index).accept(context, () -> {
+                    CallbackList.get(index).accept(context, (meiyong) -> {
                         fs[0].accept(index + 1);
-                        return "";
                     });
                 };
                 fs[0].accept(0);
@@ -41,7 +40,7 @@ public class Server {
         return this;
     }
 
-    public Server use(BiConsumer<Context, Supplier<String>> callback) {
+    public Server use(BiConsumer<Context, Consumer<String>> callback) {
         CallbackList.add(callback);
         return this;
     }

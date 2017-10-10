@@ -3,15 +3,16 @@ package moe.haozi.qingyunxiang.apiServer.HttpServer.Server;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
+import java.net.URI;
 
 public class Context {
     public HttpExchange httpExchange;
+    public URI url() {
+        return this.httpExchange.getRequestURI();
+    }
     public Context(HttpExchange httpExchange) {
         this.httpExchange = httpExchange;
     }
-
-
-
 
     public Context statu(int code) throws IOException {
         this.httpExchange.sendResponseHeaders(code, 0);
