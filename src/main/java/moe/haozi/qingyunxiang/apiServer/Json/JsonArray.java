@@ -3,25 +3,25 @@ package moe.haozi.qingyunxiang.apiServer.Json;
 import java.util.ArrayList;
 
 public class JsonArray {
-    private ArrayList<JsonValue> list = new ArrayList<>();
+    public ArrayList<JsonValue> list = new ArrayList<>();
 
     public JsonArray() {
     }
 
-    public JsonArray put(String key, Integer value){
+    public JsonArray put(Integer value){
         list.add(new JsonValue(EJsonValueType.Int, "", value));
         return this;
     }
-    public JsonArray put(String key, JsonArray value){
-        list.add(new JsonValue(EJsonValueType.Int, "", value));
+    public JsonArray put(JsonArray value){
+        list.add(new JsonValue(EJsonValueType.Array, "", value));
         return this;
     }
-    public JsonArray put(String key, JsonObject value){
-        list.add(new JsonValue(EJsonValueType.Int, "", value));
+    public JsonArray put(JsonObject value){
+        list.add(new JsonValue(EJsonValueType.Object, "", value));
         return this;
     }
-    public JsonArray put(String key, String value){
-        list.add(new JsonValue(EJsonValueType.Int, "", value));
+    public JsonArray put(String value){
+        list.add(new JsonValue(EJsonValueType.String, "", value));
         return this;
     }
 
