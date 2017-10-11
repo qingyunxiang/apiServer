@@ -1,12 +1,14 @@
 package moe.haozi.qingyunxiang.apiServer.Tools;
 
+import sun.plugin.util.PluginSysUtil;
+
 import java.io.File;
+import java.net.JarURLConnection;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class ClassHelper {
     public Set<Class<?>> getClasses() {
@@ -15,22 +17,31 @@ public class ClassHelper {
 
     private Set<Class<?>> classes = new LinkedHashSet<Class<?>>();
 
-    public ClassHelper scanner(String packagePath) {
-//        packagePath = packagePath.replace(".", "/");
-        URL url = Thread.currentThread().getContextClassLoader().getResource(packagePath);
+    public ClassHelper scanner(Enumeration<URL> packageUrl) {
         try {
-            if (url != null && url.toString().startsWith("file")) {
-                String filePath = URLDecoder.decode(url.getFile(),"utf-8");
-                File dir = new File(filePath);
-                List<File> fileList = new ArrayList<File>();
-                fetchFileList(dir,fileList);
-                for (File f: fileList) {
-                    String fileName = f.getAbsolutePath();
-                    if (fileName.endsWith(".class")) {
-                        String nosuffixFileName = fileName.substring(8+fileName.lastIndexOf("classes"),fileName.indexOf(".class"));
-                        String filePackage = nosuffixFileName.replaceAll("\\\\", ".");
-                        Class<?> clazz = Class.forName(filePackage);
-                        classes.add(clazz);
+            while (packageUrl.hasMoreElements()) {
+                URL url = packageUrl.nextElement();//得到的结果大概是：jar:file:/C:/Users/ibm/.m2/repository/junit/junit/4.12/junit-4.12.jar!/org/junit
+                String protocol = url.getProtocol();//大概是jar
+                if ("jar".equalsIgnoreCase(protocol)) {
+                    //转换为JarURLConnection
+                    JarURLConnection connection = (JarURLConnection) url.openConnection();
+                    if (connection != null) {
+                        JarFile jarFile = connection.getJarFile();
+                        if (jarFile != null) {
+                            //得到该jar文件下面的类实体
+                            Enumeration<JarEntry> jarEntryEnumeration = jarFile.entries();
+                            while (jarEntryEnumeration.hasMoreElements()) {
+                                JarEntry entry = jarEntryEnumeration.nextElement();
+                                String jarEntryName = entry.getName();
+                                //这里我们需要过滤不是class文件和不在basePack包名下的类
+                                if (jarEntryName.contains(".class") && jarEntryName.replaceAll("/",".").startsWith("moe.haozi.qingyunxiang.apiServer")) {
+                                    String className = jarEntryName.substring(0, jarEntryName.lastIndexOf(".")).replace("/", ".");
+                                    Class cls = Class.forName(className);
+                                    getClasses().add(cls);
+                                    System.out.println(cls);
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -38,14 +49,5 @@ public class ClassHelper {
             e.printStackTrace();
         }
         return this;
-    }
-    private static void  fetchFileList(File dir,List<File> fileList){
-        if(dir.isDirectory()){
-            for(File f:dir.listFiles()){
-                fetchFileList(f,fileList);
-            }
-        }else{
-            fileList.add(dir);
-        }
     }
 }

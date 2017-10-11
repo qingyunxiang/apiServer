@@ -5,7 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
-@Retention(RetentionPolicy.RUNTIME) // 运行时保存
-public @interface Post{
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.PARAMETER)
+public @interface Param {
+    String value() default "qwq";
 }
