@@ -1,10 +1,9 @@
 package moe.haozi.qingyunxiang.apiServer.HttpServer;
 
-import moe.haozi.qingyunxiang.apiServer.HttpServer.Router.Route;
 import moe.haozi.qingyunxiang.apiServer.HttpServer.Router.Router;
 import moe.haozi.qingyunxiang.apiServer.HttpServer.Server.Server;
+import moe.haozi.qingyunxiang.apiServer.Json.JsonObject;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 
 
@@ -24,6 +23,17 @@ public class RestfulServer {
         Router.Get("/whitelist", (ctx) -> {
             System.out.println("Url -> ");
             System.out.println(ctx.httpExchange.getRequestURI());
+            try {
+                ctx.statu(200);
+                ctx.ContentType("text/plain");
+                JsonObject jsonObject = new JsonObject();
+                jsonObject.put("url", ctx.url().getPath());
+                ctx.write(jsonObject.toString().getBytes());
+                ctx.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
         });
         server.use(Router.route());
         server.listen(new InetSocketAddress(8099));
