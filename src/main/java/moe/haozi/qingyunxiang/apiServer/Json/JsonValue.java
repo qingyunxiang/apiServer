@@ -23,7 +23,9 @@ public class JsonValue {
             case Object:
                 return ((JsonObject)Value).toString();
             case String:
-                return Value.toString();
+                return "\"" + Value.toString() + "\"";
+            case Float:
+                return ((Float)Value).toString();
             default:
                 return "????? 这tm是什么东西";
         }

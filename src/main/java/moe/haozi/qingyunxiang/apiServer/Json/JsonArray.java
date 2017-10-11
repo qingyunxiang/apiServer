@@ -24,14 +24,19 @@ public class JsonArray {
         list.add(new JsonValue(EJsonValueType.String, "", value));
         return this;
     }
-
+    public JsonArray put(Float value){
+        list.add(new JsonValue(EJsonValueType.Float, "", value));
+        return this;
+    }
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("[");
         for(int i = 0; i < list.size(); i++) {
-            sb.append(",");
             sb.append(list.get(i).toString());
+            if ((i + 1) < list.size()) {
+                sb.append(",");
+            }
         }
         sb.append("]");
         return sb.toString();
