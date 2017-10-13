@@ -17,7 +17,7 @@ public class ClassHelper {
 
     private Set<Class<?>> classes = new LinkedHashSet<Class<?>>();
 
-    public ClassHelper scanner(Enumeration<URL> packageUrl) {
+    public ClassHelper scanner(Enumeration<URL> packageUrl, String packagePath) {
         try {
             while (packageUrl.hasMoreElements()) {
                 URL url = packageUrl.nextElement();//得到的结果大概是：jar:file:/C:/Users/ibm/.m2/repository/junit/junit/4.12/junit-4.12.jar!/org/junit
@@ -34,7 +34,7 @@ public class ClassHelper {
                                 JarEntry entry = jarEntryEnumeration.nextElement();
                                 String jarEntryName = entry.getName();
                                 //这里我们需要过滤不是class文件和不在basePack包名下的类
-                                if (jarEntryName.contains(".class") && jarEntryName.replaceAll("/",".").startsWith("moe.haozi.qingyunxiang.apiServer")) {
+                                if (jarEntryName.contains(".class") && jarEntryName.replaceAll("/",".").startsWith(packagePath)) {
                                     String className = jarEntryName.substring(0, jarEntryName.lastIndexOf(".")).replace("/", ".");
                                     Class cls = Class.forName(className);
                                     getClasses().add(cls);

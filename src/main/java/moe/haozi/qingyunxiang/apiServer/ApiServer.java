@@ -26,23 +26,7 @@ public class ApiServer extends JavaPlugin{
     @Override
     public void onEnable() {
         try {
-            new RestfulServer(getServer());
-            Set<Class<?>> classes = new ClassHelper().scanner(getClassLoader().getResources("moe/haozi/qingyunxiang/apiServer")).getClasses();
-//            for(Class<?> _class : classes) {
-//                for(Method method: _class.getMethods()) {
-//                    if (method.isAnnotationPresent(Get.class)) {
-//                        Get get = method.getAnnotation(Get.class);
-//                        Router.Get(method.getAnnotation(Path.class).value(), (ctx) -> {
-//                            try {
-//                                method.invoke(_class.newInstance(), new Object[]{ ctx});
-//                            }catch (Exception e) {
-//                                e.printStackTrace();
-//                            }
-//                        });
-//
-//                    }
-//                }
-//            }
+            new RestfulServer(getServer(), getClassLoader());
         } catch (Exception e) {
             e.printStackTrace();
         }
