@@ -1,5 +1,6 @@
 package moe.haozi.qingyunxiang.apiServer.HttpServer.Router;
 
+import com.avaje.ebean.Update;
 import moe.haozi.qingyunxiang.apiServer.Annotations.Server;
 import moe.haozi.qingyunxiang.apiServer.HttpServer.Router.Decorators.*;
 import moe.haozi.qingyunxiang.apiServer.HttpServer.Server.Context;
@@ -35,6 +36,12 @@ public class Router {
         Set<Class<?>> classes = new ClassHelper().scanner(classLoader.getResources(packagePath.replace(".", "/")), packagePath).getClasses();
         try {
             for(Class<?> _class : classes) {
+                if(!_class.isAnnotationPresent(Controller.class)) {
+                    return;
+                }
+
+                String prefix =  _class.getAnnotation(Controller.class).value();
+
                 for(Method method: _class.getMethods()) {
                     final Route route = new Route();
                     route.method(Context.HttpMethod.GET);
@@ -47,7 +54,11 @@ public class Router {
                             route.parmaList.forEach((key, value) -> {
 
                                 if(key instanceof Server) {
-                                    args.add(value);
+                                    if(value == null) {
+                                        args.add(route.parmaListValue.get(key));
+                                    } else {
+                                        args.add(value);
+                                    }
                                 } else if (key instanceof Param) {
                                     args.add(route.getParma(ctx, value));
                                 } else if(key instanceof Query) {
@@ -55,7 +66,7 @@ public class Router {
                                 }
                             });
 
-                            method.invoke(_class.newInstance(), args);
+                            method.invoke(_class.newInstance(), args.toArray() );
                         }catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -64,8 +75,20 @@ public class Router {
                         route.method(Context.HttpMethod.GET);
                     } else if (method.isAnnotationPresent(Post.class)) {
                         route.method(Context.HttpMethod.POST);
+                    } else if (method.isAnnotationPresent(Post.class)) {
+                        route.method(Context.HttpMethod.PUT);
+                    } else if (method.isAnnotationPresent(Put.class)) {
+                        route.method(Context.HttpMethod.DELETE);
+                    } else if (method.isAnnotationPresent(Delete.class)) {
+                        route.method(Context.HttpMethod.UPDATE);
+                    } else if (method.isAnnotationPresent(UPDATE.class)) {
+                        route.method(Context.HttpMethod.UPDATE);
+                    } else if (method.isAnnotationPresent(PATCH.class)) {
+                        route.method(Context.HttpMethod.PATCH);
                     } else if(method.isAnnotationPresent(Path.class)) {
-                        route.setPath(method.getAnnotation(Path.class).value());
+                        route.setPath(prefix += method.getAnnotation(Path.class).value());
+                    } else if(method.isAnnotationPresent(HttpCode.class)) {
+                        route.setHttpCode(method.getAnnotation(HttpCode.class).value());
                     }
 
                     if (method.getParameterCount() > 0) {
@@ -81,6 +104,7 @@ public class Router {
                             }
                         }
                     }
+                    Router.routes.add(route);
                 }
             }
         } catch (Exception e) {

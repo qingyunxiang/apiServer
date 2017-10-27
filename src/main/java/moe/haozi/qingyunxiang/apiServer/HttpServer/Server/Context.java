@@ -20,12 +20,15 @@ public class Context {
     }
     public Context.HttpMethod method = HttpMethod.GET;
     public String rawReqBody = "";
+    public String resBody = "emmm, body is null..............................";
 
     public static enum HttpMethod {
         GET,
         POST,
         DELETE,
         PUT,
+        UPDATE,
+        PATCH
     }
 
     public Context(HttpExchange httpExchange) {
@@ -74,6 +77,18 @@ public class Context {
                 break;
             case "POST":
                 this.method = HttpMethod.POST;
+                break;
+            case "DELETE":
+                this.method = HttpMethod.DELETE;
+                break;
+            case "PUT":
+                this.method = HttpMethod.PUT;
+                break;
+            case "UPDATE":
+                this.method = HttpMethod.UPDATE;
+                break;
+            case "PATCH":
+                this.method = HttpMethod.PATCH;
                 break;
         }
         return this;

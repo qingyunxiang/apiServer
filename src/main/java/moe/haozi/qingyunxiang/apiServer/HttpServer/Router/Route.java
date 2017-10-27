@@ -58,4 +58,9 @@ public class Route {
         this.method = method;
         return  this;
     }
+
+    public Route setHttpCode(int code) {
+        this.defaultHttpCode = code;
+        return this;
+    }
 }
