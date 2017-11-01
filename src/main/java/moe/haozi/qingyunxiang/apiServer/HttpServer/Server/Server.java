@@ -18,7 +18,7 @@ public class Server {
         server.createContext("/", new HttpHandler() {
             @Override
             public void handle(HttpExchange httpExchange) throws IOException {
-                Context context = new Context(httpExchange);
+                 Context context = new Context(httpExchange);
                 IntConsumer[] fs =  {null};
                 fs[0] = index -> {
                     if(CallbackList.get(index) == null) {

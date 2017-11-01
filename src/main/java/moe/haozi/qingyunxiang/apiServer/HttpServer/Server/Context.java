@@ -1,6 +1,7 @@
 package moe.haozi.qingyunxiang.apiServer.HttpServer.Server;
 
 import com.sun.net.httpserver.HttpExchange;
+import moe.haozi.qingyunxiang.apiServer.HttpServer.Router.Route;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,7 +22,7 @@ public class Context {
     public Context.HttpMethod method = HttpMethod.GET;
     public String rawReqBody = "";
     public String resBody = "emmm, body is null..............................";
-
+    public Route route;
     public static enum HttpMethod {
         GET,
         POST,
@@ -66,8 +67,7 @@ public class Context {
 
     public void parseConext() {
         this.parseMethod()
-                .parseQuery()
-                .parseParma();
+                .parseQuery();
     }
 
     public Context parseMethod() {
@@ -113,7 +113,7 @@ public class Context {
         return this;
     }
 
-    public Context parseParma() {
+    public Context parseBody() {
         try {
 
             InputStreamReader inputStreamReader = new InputStreamReader(httpExchange.getRequestBody(), getEncoding());
@@ -138,7 +138,10 @@ public class Context {
     }
 
     public String getEncoding() {
-//        return  System.getProperty("file.encoding");
         return  "UTF-8";
+    }
+
+    public String getParam(String key) {
+        return route.pathRegex.getKey(url().getPath(), key);
     }
 }

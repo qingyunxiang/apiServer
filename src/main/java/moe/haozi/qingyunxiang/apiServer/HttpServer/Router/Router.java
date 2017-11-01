@@ -5,6 +5,8 @@ import moe.haozi.qingyunxiang.apiServer.Annotations.Server;
 import moe.haozi.qingyunxiang.apiServer.HttpServer.Router.Decorators.*;
 import moe.haozi.qingyunxiang.apiServer.HttpServer.Server.Context;
 import moe.haozi.qingyunxiang.apiServer.Tools.ClassHelper;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -23,9 +25,15 @@ public class Router {
                 Route route = Router.routes.get(i);
                 if (route != null) {
                     if (route.exec(ctx)) {
-                        break;
+                        return;
                     }
                 }
+            }try{
+                ctx.statu(200);
+                ctx.write("not found".getBytes());
+                ctx.close();
+            } catch (Exception e){
+                ;
             }
             next.accept(null);
         };
@@ -43,6 +51,9 @@ public class Router {
                 String prefix =  _class.getAnnotation(Controller.class).value();
 
                 for(Method method: _class.getMethods()) {
+                    if(!method.isAnnotationPresent(Path.class)) {
+                        continue;
+                    }
                     final Route route = new Route();
                     route.method(Context.HttpMethod.GET);
                     route.setCallback((ctx) -> {
@@ -60,7 +71,7 @@ public class Router {
                                         args.add(value);
                                     }
                                 } else if (key instanceof Param) {
-                                    args.add(route.getParma(ctx, value));
+                                    args.add(ctx.getParam(((Param) key).value()));
                                 } else if(key instanceof Query) {
                                     args.add(route.getQuery(ctx, value));
                                 }
@@ -73,21 +84,26 @@ public class Router {
                     });
                     if (method.isAnnotationPresent(Get.class)) {
                         route.method(Context.HttpMethod.GET);
-                    } else if (method.isAnnotationPresent(Post.class)) {
+                    }
+                    if (method.isAnnotationPresent(Post.class)) {
                         route.method(Context.HttpMethod.POST);
-                    } else if (method.isAnnotationPresent(Post.class)) {
+                    }
+                    if (method.isAnnotationPresent(Put.class)) {
                         route.method(Context.HttpMethod.PUT);
-                    } else if (method.isAnnotationPresent(Put.class)) {
+                    }
+                    if (method.isAnnotationPresent(Delete.class)) {
                         route.method(Context.HttpMethod.DELETE);
-                    } else if (method.isAnnotationPresent(Delete.class)) {
+                    }
+                    if (method.isAnnotationPresent(UPDATE.class)) {
                         route.method(Context.HttpMethod.UPDATE);
-                    } else if (method.isAnnotationPresent(UPDATE.class)) {
-                        route.method(Context.HttpMethod.UPDATE);
-                    } else if (method.isAnnotationPresent(PATCH.class)) {
+                    }
+                    if (method.isAnnotationPresent(PATCH.class)) {
                         route.method(Context.HttpMethod.PATCH);
-                    } else if(method.isAnnotationPresent(Path.class)) {
-                        route.setPath(prefix += method.getAnnotation(Path.class).value());
-                    } else if(method.isAnnotationPresent(HttpCode.class)) {
+                    }
+                    if(method.isAnnotationPresent(Path.class)) {
+                        route.setPath(prefix + method.getAnnotation(Path.class).value());
+                    }
+                    if(method.isAnnotationPresent(HttpCode.class)) {
                         route.setHttpCode(method.getAnnotation(HttpCode.class).value());
                     }
 
@@ -108,7 +124,7 @@ public class Router {
                 }
             }
         } catch (Exception e) {
-
+            e.printStackTrace();
         }
     }
     static public void RegisterRoute(String packagePath) throws IOException{

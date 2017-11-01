@@ -1,6 +1,8 @@
 package moe.haozi.qingyunxiang.apiServer.HttpServer.Router;
 
 import moe.haozi.qingyunxiang.apiServer.HttpServer.Server.Context;
+import moe.haozi.qingyunxiang.apiServer.Tools.PathRegex;
+import org.bukkit.Bukkit;
 
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
@@ -17,6 +19,7 @@ public class Route {
     public LinkedHashMap<Annotation, Object> parmaListValue = new LinkedHashMap<>();
     public int defaultHttpCode = 200;
     public String defaultResText = "hello world";
+    public PathRegex pathRegex ;
 
     public Route addParma(Annotation annotation, String key) {
         parmaList.put(annotation, key);
@@ -25,6 +28,8 @@ public class Route {
 
     public void setPath(String path) {
         this.path = path;
+        Bukkit.getLogger().info("path ->" + path);
+        pathRegex = new PathRegex(path);
     }
 
     public void setCallback(Consumer<Context> callback) {
@@ -42,12 +47,17 @@ public class Route {
     }
 
     public Boolean exec(Context ctx) {
+        ctx.route = this;
+        if(!ctx.route.pathRegex.exec(ctx.url().getPath()) || ctx.method == method) {
+            return false;
+        }
+
         this.callback.accept(ctx);
         return true;
     }
 
     public String getParma(Context ctx, String key) {
-        return "??";
+        return pathRegex.getKey(ctx.url().getPath(), key);
     }
 
     public String getQuery(Context ctx, String key) {
