@@ -9,27 +9,28 @@ import moe.haozi.qingyunxiang.apiServer.HttpServer.Router.Decorators.HttpCode;
 import moe.haozi.qingyunxiang.apiServer.HttpServer.Router.Decorators.Param;
 import moe.haozi.qingyunxiang.apiServer.HttpServer.Server.Context;
 import moe.haozi.qingyunxiang.apiServer.HttpServer.Server.HttpStatuCode;
-import org.bukkit.entity.Player;
+import org.anjocaido.groupmanager.GroupManager;
 import org.json.simple.JSONObject;
 
+import java.util.UUID;
 
 
 @Controller("/player")
 public class PlayerController {
-    @Get(":playerName/ess/prefix")
+    @Get(":uuid/ess/prefix")
     @HttpCode(HttpStatuCode.OK)
     public JSONObject getPrefix(
             Context context,
             @Server org.bukkit.Server server,
-            @Param("playerName") String  playerName
+            @Param("playerName") String  uuid
     ) {
         JSONObject jsonObject = new JSONObject();
-        IEssentials essentials = (IEssentials) server.getPluginManager().getPlugin("Essentials");
-        User user = essentials.getUser(playerName);
-//        if(user == null) {
-//             NotFound Error
-//            return "notFound";
-//        }
-
+        String name = server.getPlayer(UUID.fromString(uuid)).getName();
+        server.dispatchCommand(server.getConsoleSender(), "/manuaddv " +
+                name + " prefix " + context.body.get("prefix"));
+        jsonObject.put("uuid", uuid);
+        jsonObject.put("prefix", context.body.get("prefix"));
+        jsonObject.put("name", name);
+        return jsonObject;
     }
 }
