@@ -8,4 +8,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME) // 运行时保存
 public @interface Put {
+    String value() default "";
 }
+

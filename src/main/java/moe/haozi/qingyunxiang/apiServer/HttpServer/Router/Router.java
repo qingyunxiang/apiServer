@@ -28,13 +28,14 @@ public class Router {
                         return;
                     }
                 }
-            }try{
-                ctx.statu(200);
-                ctx.write("not found".getBytes());
-                ctx.close();
-            } catch (Exception e){
-                ;
             }
+//            try{
+//                ctx.statu(200);
+//                ctx.write("not found".getBytes());
+//                ctx.close();
+//            } catch (Exception e){
+//                ;
+//            }
             next.accept(null);
         };
     }
@@ -51,9 +52,9 @@ public class Router {
                 String prefix =  _class.getAnnotation(Controller.class).value();
 
                 for(Method method: _class.getMethods()) {
-                    if(!method.isAnnotationPresent(Path.class)) {
-                        continue;
-                    }
+//                    if(!method.isAnnotationPresent(Path.class)) {
+//                        continue;
+//                    }
                     final Route route = new Route();
                     route.method(Context.HttpMethod.GET);
                     route.setCallback((ctx) -> {
@@ -76,33 +77,34 @@ public class Router {
                                     args.add(route.getQuery(ctx, value));
                                 }
                             });
-
-                            method.invoke(_class.newInstance(), args.toArray() );
+                            Object returnValue = method.invoke(_class.newInstance(), args.toArray() );
+                            ctx.returnValue(returnValue);
                         }catch (Exception e) {
                             e.printStackTrace();
                         }
                     });
                     if (method.isAnnotationPresent(Get.class)) {
                         route.method(Context.HttpMethod.GET);
-                    }
-                    if (method.isAnnotationPresent(Post.class)) {
+                        route.setPath(prefix + method.getAnnotation(Get.class).value());
+                    } else if (method.isAnnotationPresent(Post.class)) {
                         route.method(Context.HttpMethod.POST);
-                    }
-                    if (method.isAnnotationPresent(Put.class)) {
+                        route.setPath(prefix + method.getAnnotation(Post.class).value());
+                    } else if (method.isAnnotationPresent(Put.class)) {
                         route.method(Context.HttpMethod.PUT);
-                    }
-                    if (method.isAnnotationPresent(Delete.class)) {
+                        route.setPath(prefix + method.getAnnotation(Put.class).value());
+                    } else if (method.isAnnotationPresent(Delete.class)) {
                         route.method(Context.HttpMethod.DELETE);
-                    }
-                    if (method.isAnnotationPresent(UPDATE.class)) {
+                        route.setPath(prefix + method.getAnnotation(Delete.class).value());
+                    } else if (method.isAnnotationPresent(UPDATE.class)) {
                         route.method(Context.HttpMethod.UPDATE);
-                    }
-                    if (method.isAnnotationPresent(PATCH.class)) {
+                        route.setPath(prefix + method.getAnnotation(UPDATE.class).value());
+                    } else if (method.isAnnotationPresent(PATCH.class)) {
                         route.method(Context.HttpMethod.PATCH);
+                        route.setPath(prefix + method.getAnnotation(PATCH.class).value());
+                    } else {
+                        continue;
                     }
-                    if(method.isAnnotationPresent(Path.class)) {
-                        route.setPath(prefix + method.getAnnotation(Path.class).value());
-                    }
+
                     if(method.isAnnotationPresent(HttpCode.class)) {
                         route.setHttpCode(method.getAnnotation(HttpCode.class).value());
                     }
@@ -120,6 +122,7 @@ public class Router {
                             }
                         }
                     }
+                    route.returnType = method.getReturnType();
                     Router.routes.add(route);
                 }
             }

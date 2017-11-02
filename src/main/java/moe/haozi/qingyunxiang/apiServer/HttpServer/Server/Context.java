@@ -2,6 +2,8 @@ package moe.haozi.qingyunxiang.apiServer.HttpServer.Server;
 
 import com.sun.net.httpserver.HttpExchange;
 import moe.haozi.qingyunxiang.apiServer.HttpServer.Router.Route;
+import org.json.simple.JSONObject;
+import org.json.simple.JSONValue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -20,9 +22,14 @@ public class Context {
         return this.httpExchange.getRequestURI();
     }
     public Context.HttpMethod method = HttpMethod.GET;
+    public JSONObject body = null;
+    // body  元数据
     public String rawReqBody = "";
     public String resBody = "emmm, body is null..............................";
     public Route route;
+    // 防止二次close 的flag
+    private Boolean isClose = false;
+    public int httpCode = 200;
     public static enum HttpMethod {
         GET,
         POST,
@@ -38,7 +45,8 @@ public class Context {
     }
 
     public Context statu(int code) throws IOException {
-        this.httpExchange.sendResponseHeaders(code, 0);
+//        this.httpExchange.sendResponseHeaders(code, 0);
+        httpCode = code;
         return  this;
     }
 
@@ -49,7 +57,9 @@ public class Context {
     }
 
     public void close() {
-        this.httpExchange.close();
+        if(!isClose) {
+            this.httpExchange.close();
+        }
     }
 
     public Context write(int b) throws IOException {
@@ -60,6 +70,7 @@ public class Context {
         this.httpExchange.getResponseBody().write(b);
         return this;
     }
+
     public Context write(byte b[], int off, int len) throws IOException {
         this.httpExchange.getResponseBody().write(b, off, len);
         return this;
@@ -67,7 +78,8 @@ public class Context {
 
     public void parseConext() {
         this.parseMethod()
-                .parseQuery();
+                .parseQuery()
+                .parseBody();
     }
 
     public Context parseMethod() {
@@ -124,6 +136,13 @@ public class Context {
                 postbody.append(line);
             }
             this.rawReqBody = postbody.toString();
+            try {
+                JSONObject body = (JSONObject) JSONValue.parse(rawReqBody);
+                this.body = body;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
 
             // 解析Body 拿值
 
@@ -143,5 +162,24 @@ public class Context {
 
     public String getParam(String key) {
         return route.pathRegex.getKey(url().getPath(), key);
+    }
+
+    public void returnValue(Object value) {
+        try {
+            byte [] res ={};
+            if(route.returnType == JSONObject.class) {
+                this.ContentType("application/json");
+                res = ((JSONObject) value).toJSONString().getBytes();
+            } else if(route.returnType == String.class) {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("meesage", value);
+                res = ((String) jsonObject.toJSONString()).getBytes();
+            }
+
+            this.httpExchange.sendResponseHeaders(this.httpCode, res.length);
+            this.write(res);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

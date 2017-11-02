@@ -29,5 +29,7 @@
     <orderEntry type="library" name="Maven: org.eclipse.jetty:jetty-client:9.4.4.v20170414" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty.websocket:websocket-servlet:9.4.4.v20170414" level="project" />
     <orderEntry type="library" name="Maven: org.eclipse.jetty.websocket:websocket-api:9.4.4.v20170414" level="project" />
+    <orderEntry type="library" name="EssentialsGroupManager" level="project" />
+    <orderEntry type="library" name="Essentials" level="project" />
   </component>
 </module>

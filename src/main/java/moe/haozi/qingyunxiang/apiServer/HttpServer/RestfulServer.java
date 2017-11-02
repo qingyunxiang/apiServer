@@ -13,7 +13,7 @@ public class RestfulServer {
         Router.RegisterRoute( "moe.haozi.qingyunxiang.apiServer.HttpServer.Controllers", classLoader, bukkit);
         server.use(Router.route());
         server.use((ctx, next) -> {
-           System.out.println(ctx.Query.get("qwq"));
+            ctx.close();
         });
         server.listen(new InetSocketAddress(8099));
     }

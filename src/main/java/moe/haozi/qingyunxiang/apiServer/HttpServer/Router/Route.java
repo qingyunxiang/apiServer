@@ -20,6 +20,7 @@ public class Route {
     public int defaultHttpCode = 200;
     public String defaultResText = "hello world";
     public PathRegex pathRegex ;
+    public Class<?> returnType;
 
     public Route addParma(Annotation annotation, String key) {
         parmaList.put(annotation, key);
@@ -48,7 +49,7 @@ public class Route {
 
     public Boolean exec(Context ctx) {
         ctx.route = this;
-        if(!ctx.route.pathRegex.exec(ctx.url().getPath()) || ctx.method == method) {
+        if(!ctx.route.pathRegex.exec(ctx.url().getPath()) || ctx.method != method) {
             return false;
         }
 
