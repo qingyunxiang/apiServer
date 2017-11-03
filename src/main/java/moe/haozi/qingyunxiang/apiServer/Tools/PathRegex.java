@@ -18,14 +18,14 @@ public class PathRegex {
             sourcePath = rule;
             pretreatment();
             // 处理 /a/:id
-            Pattern pattern1 = Pattern.compile(":(.*)\\/?");
+            Pattern pattern1 = Pattern.compile(":((.+?)($|/))");
             Matcher res1 = pattern1.matcher(regexText);
             int i = 0;
             while (res1.find()) {
-                params.put(res1.group().split(":")[1], new Integer(++i));
+                params.put(res1.group(2), new Integer(++i));
             }
-            regexText = "^" + regexText.replaceAll("(\\/.+?\\/?)", "$0")
-                    .replaceAll(":(.*)\\/?", "([^\\/]+?)") + "$";
+            regexText = "^" + regexText.replaceAll("(/.+?/?)", "$0")
+                    .replaceAll(":(.+?($|/))", "([^/]+?)$2");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
