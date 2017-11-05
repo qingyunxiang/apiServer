@@ -54,6 +54,11 @@ public class Route {
         }
 
         this.callback.accept(ctx);
+        try {
+            ctx.statu(this.defaultHttpCode);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return true;
     }
 

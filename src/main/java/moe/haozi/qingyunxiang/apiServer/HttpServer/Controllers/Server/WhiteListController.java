@@ -30,11 +30,11 @@ public class WhiteListController {
         return "add " + context.body.get("name") + "ok~";
     }
 
-    @Delete("")
+    @Delete("/:name")
     @HttpCode(HttpStatuCode.NOCONTENT)
-    public String delect (Context context, @Server org.bukkit.Server server) throws NotFoundError {
-        server.dispatchCommand(server.getConsoleSender(), "whitelist remove " + context.body.get("name"));
-        return "delect " + context.body.get("name") + "ok~";
+    public String delect (Context context, @Server org.bukkit.Server server, @Param("name") String name) throws NotFoundError {
+        server.dispatchCommand(server.getConsoleSender(), "whitelist remove " + name);
+        return "delect " + name + "ok~";
     }
 
 }

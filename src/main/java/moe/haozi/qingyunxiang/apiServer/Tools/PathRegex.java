@@ -25,7 +25,7 @@ public class PathRegex {
                 params.put(res1.group(2), new Integer(++i));
             }
             regexText = "^" + regexText.replaceAll("(/.+?/?)", "$0")
-                    .replaceAll(":(.+?($|/))", "([^/]+?)$2");
+                    .replaceAll(":(.+?($|/))", "([^/]+)$2");
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
