@@ -1,6 +1,6 @@
 <component name="ArtifactManager">
   <artifact type="jar" build-on-make="true" name="apiServer:jar">
-    <output-path>$USER_HOME$/Desktop/spigotMC/1.7.10 craftbukkit/plugins</output-path>
+    <output-path>$USER_HOME$/Desktop</output-path>
     <root id="archive" name="apiServer.jar">
       <element id="module-output" name="apiServer" />
       <element id="file-copy" path="$PROJECT_DIR$/plugin.yml" />
