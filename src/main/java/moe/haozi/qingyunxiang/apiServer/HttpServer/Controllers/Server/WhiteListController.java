@@ -36,5 +36,4 @@ public class WhiteListController {
         server.dispatchCommand(server.getConsoleSender(), "whitelist remove " + name);
         return "delect " + name + "ok~";
     }
-
 }
