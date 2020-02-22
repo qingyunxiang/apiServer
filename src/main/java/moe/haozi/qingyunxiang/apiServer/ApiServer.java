@@ -1,27 +1,28 @@
 package moe.haozi.qingyunxiang.apiServer;
 
 import moe.haozi.qingyunxiang.apiServer.HttpServer.RestfulServer;
-import org.bukkit.Color;
-import org.bukkit.block.Block;
+import org.bukkit.Sound;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
-import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
+import java.io.File;
 import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class ApiServer extends JavaPlugin {
     private Connection connection;
     private String prefix = McColor.red + "[工艺小镇]" + McColor.white;
+    private Timer timer;
+    private FileConfiguration configuration = null;
 
     @Override
     public void onLoad() {
@@ -36,29 +37,101 @@ public class ApiServer extends JavaPlugin {
     @Override
     public void onEnable() {
         try {
-//            Class.forName("com.mysql.jdbc.Driver");
-//            connection = DriverManager.getConnection(
-//                    "jdbc:mysql://127.0.0.1:3306/craft_townlet",
-//                    "craftTownlet",
-//                    "LyVMP8h3GnWP8iM"
-//
-//            );
-//
-//            if (connection.isClosed()) {
-//                getServer().getLogger().info("链接数据库失败");
-//            }
-//
-//            getLogger().info("ApiServer 数据库连接初始化完成");
-
             new RestfulServer(getServer(), getClassLoader());
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        reload_config();
+
+
         getLogger().info(prefix + "插件加载成功");
+//        task();
+    }
+
+    public void reload_config() {
+        //创建插件文件夹与config.yml文件
+        File file = new File(getDataFolder(),"config.yml");
+        if(!getDataFolder().exists()){//判断目录是否存在 这里的目录是 plugin/插件名称/
+            getDataFolder().mkdir();//不存在则创建这个文件夹
+        }
+        if(!file.exists()){//判断文件是否存在
+            this.saveDefaultConfig();//不存在则创建默认的config.yml文件
+        }
+        this.reloadConfig();//重载配置
+
+        try {
+            this.configuration = YamlConfiguration.loadConfiguration(file);
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+    }
+
+
+    private void timer_stop_server(long time) {
+        this.timer = new Timer();
+        this.timer.scheduleAtFixedRate(new TimerTask() {
+            private int count =0;
+            @Override
+            public void run() {
+                count++;
+                String str = null;
+                if (count == 180) {
+                    str = getConfig().getString("st.180");
+                }
+                if (count == 120) {
+                    str = getConfig().getString("st.180");
+                }
+                if (count == 60) {
+                    str = getConfig().getString("st.180");
+                }
+                if (count == 30) {
+                    str = getConfig().getString("st.180");
+                }
+                if (count <= 10) {
+                    str = getConfig().getString("st.10");
+                    getServer().getOnlinePlayers().forEach(
+                            player -> {
+                                ((Player) player).playSound(((Player) player).getLocation(), Sound.VILLAGER_HIT, 1, 1);
+                            }
+                    );
+                }
+                getServer().broadcastMessage(
+                        str.replaceAll("%time%", time - count + "")
+                );
+            }
+        }, 0, 1000);
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+
+        if (sender instanceof ConsoleCommandSender) {
+            if (command.getName().equalsIgnoreCase("api_reload")) {
+                this.reload_config();
+                sender.sendMessage("配置文件已重载");
+                return true;
+            }
+            if (command.getName().equalsIgnoreCase("st") && args.length == 1) {
+                if (args[0].equalsIgnoreCase("calcel")) {
+                    if (this.timer != null) {
+                        this.timer.cancel();
+                        sender.sendMessage("已取消");
+                        getServer().broadcastMessage(getConfig().getString("st.cancel"));
+                    }
+                }
+                int time = Integer.parseInt(args[0]);
+                timer_stop_server(time);
+                getServer().broadcastMessage(getConfig().getString("st.start").replaceAll("%timer%", time / 60 + ""));
+            } else {
+                sender.sendMessage("你在用你马呢. /st <时间(秒)>   \n /st cancel 取消");
+            }
+        }
+
+
+
         if (!(sender instanceof Player)) {
             sender.sendMessage("这个命令只能玩家用");
         }
@@ -70,6 +143,7 @@ public class ApiServer extends JavaPlugin {
                 return true;
             }
         }
+
         return false;
     }
 
@@ -81,4 +155,14 @@ public class ApiServer extends JavaPlugin {
         }
     }
 
+    public void task() {
+        new Timer().scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                getServer().dispatchCommand(getServer().getConsoleSender(), "um tps");
+                getServer().dispatchCommand(getServer().getConsoleSender(), "lag");
+                getServer().dispatchCommand(getServer().getConsoleSender(), "who");
+            }
+        }, 60000L, 60000L);
+    }
 }
