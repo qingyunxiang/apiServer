@@ -46,6 +46,8 @@ public class ApiServer extends JavaPlugin {
 
 
         getLogger().info(prefix + "插件加载成功");
+
+
 //        task();
     }
 
@@ -78,29 +80,37 @@ public class ApiServer extends JavaPlugin {
             public void run() {
                 count++;
                 String str = null;
-                if (count == 180) {
-                    str = getConfig().getString("st.180");
+                String default_str = "服务器将会在 %time% 后关闭";
+                if ((time - count) == 180) {
+                    str = getConfig().getString("st.180", default_str);
                 }
-                if (count == 120) {
-                    str = getConfig().getString("st.180");
+                if ((time - count) == 120) {
+                    str = getConfig().getString("st.120", default_str);
                 }
-                if (count == 60) {
-                    str = getConfig().getString("st.180");
+                if ((time - count) == 60) {
+                    str = getConfig().getString("st.60", default_str);
                 }
-                if (count == 30) {
-                    str = getConfig().getString("st.180");
+                if ((time - count) == 30) {
+                    str = getConfig().getString("st.30", default_str);
                 }
-                if (count <= 10) {
-                    str = getConfig().getString("st.10");
+                if ((time - count) <= 10) {
+                    str = getConfig().getString("st.10", default_str);
                     getServer().getOnlinePlayers().forEach(
                             player -> {
                                 ((Player) player).playSound(((Player) player).getLocation(), Sound.VILLAGER_HIT, 1, 1);
                             }
                     );
                 }
-                getServer().broadcastMessage(
-                        str.replaceAll("%time%", time - count + "")
-                );
+
+                if (time - count == 0) {
+                    getServer().shutdown();
+                }
+                if (str != null) {
+                    getServer().broadcastMessage(
+                            getConfig().getString("st.prefix") +
+                                    str.replace("%time%", time - count + "")
+                    );
+                }
             }
         }, 0, 1000);
     }
@@ -109,32 +119,42 @@ public class ApiServer extends JavaPlugin {
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 
         if (sender instanceof ConsoleCommandSender) {
-            if (command.getName().equalsIgnoreCase("api_reload")) {
-                this.reload_config();
-                sender.sendMessage("配置文件已重载");
-                return true;
-            }
+
             if (command.getName().equalsIgnoreCase("st") && args.length == 1) {
-                if (args[0].equalsIgnoreCase("calcel")) {
+                if (args[0].equalsIgnoreCase("reload")) {
+                    this.reload_config();
+                    sender.sendMessage("配置文件已重载");
+                    return true;
+                }
+                if (args[0].equalsIgnoreCase("cancel")) {
                     if (this.timer != null) {
                         this.timer.cancel();
                         sender.sendMessage("已取消");
-                        getServer().broadcastMessage(getConfig().getString("st.cancel"));
+                        getServer().broadcastMessage(
+                                getConfig().getString("st.prefix") +
+                                        getConfig().getString("st.cancel")
+                        );
                     }
+                    return true;
                 }
                 int time = Integer.parseInt(args[0]);
                 timer_stop_server(time);
-                getServer().broadcastMessage(getConfig().getString("st.start").replaceAll("%timer%", time / 60 + ""));
+                getServer().broadcastMessage(
+                        getConfig().getString("st.prefix") +
+                        getConfig().getString("st.start").replace("%time%", time / 60 + "")
+                );
+                return true;
             } else {
                 sender.sendMessage("你在用你马呢. /st <时间(秒)>   \n /st cancel 取消");
+                return true;
             }
         }
 
 
 
-        if (!(sender instanceof Player)) {
-            sender.sendMessage("这个命令只能玩家用");
-        }
+//        if (!(sender instanceof Player)) {
+//            sender.sendMessage("这个命令只能玩家用");
+//        }
 
         if (command.getName().equalsIgnoreCase("qqlink")) {
             if (args.length != 0) {

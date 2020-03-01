@@ -2,3 +2,17 @@ name: qingyunxiang-apiServer
 version: 0.0.1
 main: moe.haozi.qingyunxiang.apiServer.ApiServer
 prefix: qyx
+permissions:
+  qyx.*:
+    description: 工艺小镇权限节点
+    children:
+      qyx.ts: true
+  qyx.ts:
+    description: 停止服务器的权限
+    default: op
+commands:
+  st:
+    description: 停止服务器
+    usage: /<command> [time秒]
+    permission: qyx.op
+    permission-message: 只能在控制台
